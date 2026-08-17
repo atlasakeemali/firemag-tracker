@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FIRE!!! — Submissions Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,400..900&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --flame-400:#e45d58;--flame-500:#d73337;--flame-600:#c21725;--flame-700:#9e141e;--flame-800:#721216;
+  --ink-300:#a59c9b;--ink-500:#6a6160;--ink-700:#423837;--ink-800:#2f2322;--ink-900:#201514;
+  --bone-50:#f9f2ed;--bone-100:#f3e9e2;--bone-200:#e7dcd2;
+  --ochre-400:#deaf5c;--ochre-500:#cf9a3d;--ochre-600:#b47825;
+  --turquoise-400:#5cc9bc;--turquoise-500:#2fb4a6;--turquoise-600:#1f8a7f;
+  --font-display:"Big Shoulders",Oswald,Impact,sans-serif;--font-body:"Newsreader",Georgia,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bone-100);color:var(--ink-900);font-family:var(--font-body);font-size:0.95rem;line-height:1.5}
+.kicker{font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:0.14em;font-size:0.75rem;margin:0;color:var(--ink-500)}
+h1,h2,h3{font-family:var(--font-display);font-weight:800;text-transform:uppercase;letter-spacing:0.01em;margin:0}
+.hdr{position:sticky;top:0;z-index:30;background:var(--bone-50);border-bottom:6px solid var(--ink-900);padding:1rem 1.5rem}
+.hdr__row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.hdr h1{font-size:1.9rem}
+.hdr__meta{margin-left:auto;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap}
+.btn{font-family:var(--font-display);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;font-size:0.75rem;border:2px solid var(--ink-900);background:var(--bone-50);color:var(--ink-900);padding:0.55rem 1rem;cursor:pointer;border-radius:2px}
+.btn:hover{background:var(--ink-900);color:var(--bone-50)}
+.btn--flame{background:var(--flame-600);color:var(--bone-50);border-color:var(--flame-600)}
+.btn--flame:hover{background:var(--flame-700);border-color:var(--flame-700)}
+.last-sync{font-size:0.75rem;color:var(--ink-500)}
+.wrap{padding:1.25rem 1.5rem 3rem;max-width:1400px;margin:0 auto}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;margin-bottom:1.5rem}
+.tile{background:var(--bone-50);border:2px solid var(--ink-900);padding:0.9rem 1rem}
+.tile .kicker{margin-bottom:0.35rem}
+.tile__val{font-family:var(--font-display);font-weight:800;font-size:1.7rem;line-height:1}
+.tile__val small{font-size:0.9rem;font-weight:600;color:var(--ink-500)}
+.status-list{display:flex;flex-direction:column;gap:0.3rem;margin-top:0.4rem}
+.status-list div{display:flex;justify-content:space-between;font-size:0.8rem}
+.dot{display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;margin-right:0.4rem;vertical-align:-1px}
+.toolbar{display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.toolbar input[type=text],.toolbar select{font-family:var(--font-body);font-size:0.9rem;padding:0.5rem 0.7rem;border:2px solid var(--ink-900);background:var(--bone-50);color:var(--ink-900)}
+.chip{font-family:var(--font-display);font-weight:600;text-transform:uppercase;font-size:0.7rem;letter-spacing:0.06em;padding:0.4rem 0.7rem;border:2px solid var(--ink-700);background:var(--bone-50);color:var(--ink-700);cursor:pointer;border-radius:20px}
+.chip.on{background:var(--ink-900);color:var(--bone-50);border-color:var(--ink-900)}
+.tbl-wrap{overflow-x:auto;border:2px solid var(--ink-900);background:var(--bone-50)}
+table{width:100%;border-collapse:collapse;font-size:0.88rem;min-width:1000px}
+thead th{text-align:left;font-family:var(--font-display);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;font-size:0.7rem;color:var(--ink-500);padding:0.6rem 0.75rem;border-bottom:2px solid var(--ink-900);white-space:nowrap}
+tbody td{padding:0.6rem 0.75rem;border-bottom:1px solid var(--bone-200);vertical-align:top}
+tbody tr:hover{background:var(--bone-100)}
+tbody tr{cursor:pointer}
+.pill{display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--font-display);font-weight:700;text-transform:uppercase;font-size:0.68rem;letter-spacing:0.05em;color:var(--bone-50);padding:0.25rem 0.6rem;border-radius:20px;white-space:nowrap}
+.usd{color:var(--turquoise-600);font-weight:700}
+.muted{color:var(--ink-500)}
+.empty{padding:3rem;text-align:center;color:var(--ink-500);font-style:italic}
+.overlay{position:fixed;inset:0;background:rgba(32,21,20,0.5);z-index:50}
+.overlay[hidden]{display:none}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);background:var(--bone-50);z-index:51;overflow-y:auto;border-left:6px solid var(--ink-900);padding:1.5rem}
+.drawer[hidden]{display:none}
+.drawer__close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--ink-900)}
+.drawer h2{font-size:1.5rem;margin-top:0.5rem;padding-right:2rem}
+.field{margin-top:1rem}
+.field label{display:block;font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;font-size:0.7rem;color:var(--ink-500);margin-bottom:0.3rem}
+.field .val{font-size:0.95rem;white-space:pre-wrap}
+.field a{color:var(--flame-600)}
+.field a:hover{color:var(--flame-700)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.editf input,.editf select,.editf textarea{width:100%;font-family:var(--font-body);font-size:0.9rem;padding:0.5rem 0.6rem;border:2px solid var(--ink-700);background:var(--bone-50);color:var(--ink-900)}
+.editf textarea{min-height:70px;resize:vertical}
+.hr{border:0;border-top:2px solid var(--ink-900);margin:1.5rem 0}
+.drawer__save{width:100%;margin-top:1.25rem;padding:0.8rem}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(32,21,20,0.6);display:flex;align-items:center;justify-content:center}
+.modal[hidden]{display:none}
+.modal__card{background:var(--bone-50);border:3px solid var(--ink-900);padding:1.75rem;width:min(440px,92vw)}
+.modal__card label{display:block;font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;font-size:0.7rem;color:var(--ink-500);margin:1rem 0 0.3rem}
+.modal__card input{width:100%;font-family:var(--font-body);padding:0.55rem 0.7rem;border:2px solid var(--ink-700)}
+.modal__note{font-size:0.8rem;color:var(--ink-500);margin-top:1rem;font-style:italic}
+a{color:var(--flame-600)}
+a:hover{color:var(--flame-700)}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}.hdr__meta{margin-left:0}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr__row">
+    <div><p class="kicker">FIRE!!! — internal</p><h1>Submissions</h1></div>
+    <div class="hdr__meta">
+      <span class="last-sync" id="lastSync">Not loaded</span>
+      <button class="btn" id="btnRefresh" type="button">Refresh</button>
+      <button class="btn" id="btnExport" type="button">Export CSV</button>
+      <button class="btn" id="btnSettings" type="button">Settings</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="tiles" id="tiles"></div>
+
+  <div class="toolbar">
+    <input type="text" id="fSearch" placeholder="Search name or email…">
+    <select id="fSection"><option value="">All sections</option></select>
+    <select id="fForm"><option value="">All piece forms</option></select>
+    <select id="fReviewer"><option value="">All reviewers</option></select>
+    <button class="chip" id="fClear" type="button">Clear filters</button>
+  </div>
+  <div class="toolbar" id="statusChips"></div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Received</th><th>Name</th><th>Section</th><th>Form</th><th>Status</th><th>Reviewer</th><th>Rate</th><th>Deadline</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="emptyMsg" hidden>No submissions match these filters.</div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden></div>
+<div class="drawer" id="drawer" hidden>
+  <button class="drawer__close" id="drawerClose" type="button">✕</button>
+  <p class="kicker" id="dSection">—</p>
+  <h2 id="dName">—</h2>
+  <div class="field"><label>Email</label><div class="val" id="dEmail">—</div></div>
+  <div class="field"><label>Piece form</label><div class="val" id="dForm">—</div></div>
+  <div class="field"><label>Bio</label><div class="val" id="dBio">—</div></div>
+  <div class="field"><label>Pitch</label><div class="val" id="dPitch">—</div></div>
+  <div class="field"><label>Why FIRE!!!</label><div class="val" id="dWhy">—</div></div>
+  <div class="field"><label>Sample</label><div class="val" id="dSample">—</div></div>
+  <div class="field"><label>Received</label><div class="val" id="dReceived">—</div></div>
+  <hr class="hr">
+  <h3 style="font-size:1rem">Review</h3>
+  <div class="editf">
+    <div class="grid2">
+      <div class="field"><label>Status</label><select id="eStatus"></select></div>
+      <div class="field"><label>Reviewer</label><select id="eReviewer"></select></div>
+    </div>
+    <div class="field"><label>Reviewer notes</label><textarea id="eNotes"></textarea></div>
+    <div class="grid2">
+      <div class="field"><label>Decision date</label><input type="date" id="eDecisionDate"></div>
+      <div class="field"><label>Rate offered ($)</label><input type="number" id="eRate" min="0" step="25"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Contract sent/signed</label><select id="eContract"><option value="">—</option><option>Sent</option><option>Signed</option></select></div>
+      <div class="field"><label>Payment status</label><select id="ePayment"><option value="">—</option><option>Unpaid</option><option>Scheduled</option><option>Paid</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Word count</label><input type="number" id="eWordCount" min="0"></div>
+      <div class="field"><label>Deadline for piece</label><input type="date" id="eDeadline"></div>
+    </div>
+  </div>
+  <button class="btn btn--flame drawer__save" id="btnSave" type="button">Save changes</button>
+</div>
+
+<div class="modal" id="settingsModal" hidden>
+  <div class="modal__card">
+    <h3 style="font-size:1.1rem">Connect the Sheet</h3>
+    <label>Web App URL</label>
+    <input type="text" id="cfgUrl" placeholder="https://script.google.com/macros/s/…/exec">
+    <label>Shared token</label>
+    <input type="text" id="cfgToken" placeholder="the SHARED_TOKEN from the script">
+    <button class="btn btn--flame" id="cfgSave" type="button" style="margin-top:1.25rem;width:100%">Save & load</button>
+    <p class="modal__note">From apps-script-backend.gs.txt, once deployed as a Web App. Saved to this browser only — every editor sets this once on their own machine.</p>
+  </div>
+</div>
+
+<script>
+var STATUSES=['New','Acknowledged','In review','Shortlist','Second read','Accepted','Declined','Withdrawn','Needs info','Commissioned','Paid'];
+var REVIEWERS=['Blair','Atlas','Michelle','Brian'];
+var STATUS_COLOR={'New':'#a59c9b','Acknowledged':'#5cc9bc','In review':'#deaf5c','Shortlist':'#e45d58','Second read':'#d73337','Needs info':'#b47825','Accepted':'#c21725','Commissioned':'#9e141e','Declined':'#6a6160','Withdrawn':'#423837','Paid':'#1f8a7f'};
+var EDIT_FIELDS=['status','reviewer','notes','decision_date','rate','contract','payment_status','word_count','deadline'];
+
+var state={data:[],filters:{search:'',section:'',form:'',reviewer:'',statuses:[]},activeId:null};
+
+function cfg(){ return {url:localStorage.getItem('fireCfpUrl')||'',token:localStorage.getItem('fireCfpToken')||''}; }
+function setCfg(url,token){ localStorage.setItem('fireCfpUrl',url); localStorage.setItem('fireCfpToken',token); }
+
+function jsonp(url,params,cb){
+  var name='__fireCb'+Math.random().toString(36).slice(2);
+  var qs=Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
+  var s=document.createElement('script');
+  var done=false;
+  window[name]=function(data){ done=true; cleanup(); cb(null,data); };
+  function cleanup(){ delete window[name]; if(s.parentNode) s.parentNode.removeChild(s); }
+  s.onerror=function(){ if(!done){ cleanup(); cb(new Error('load failed')); } };
+  s.src=url+(url.indexOf('?')>-1?'&':'?')+qs+'&callback='+name;
+  document.body.appendChild(s);
+  setTimeout(function(){ if(!done){ cleanup(); cb(new Error('timed out')); } },10000);
+}
+
+function load(){
+  var c=cfg();
+  if(!c.url){ openSettings(); return; }
+  document.getElementById('lastSync').textContent='Loading…';
+  jsonp(c.url,{token:c.token},function(err,data){
+    if(err || !data || data.error){
+      document.getElementById('lastSync').textContent='Load failed — check Settings';
+      return;
+    }
+    state.data=data;
+    document.getElementById('lastSync').textContent='Synced '+new Date().toLocaleTimeString();
+    populateFilterOptions();
+    render();
+  });
+}
+
+function populateFilterOptions(){
+  var sections=uniqSorted('section'),forms=uniqSorted('piece_form');
+  fillSelect('fSection',sections,'All sections');
+  fillSelect('fForm',forms,'All piece forms');
+  fillSelect('fReviewer',REVIEWERS,'All reviewers');
+}
+function uniqSorted(key){
+  var set={};
+  state.data.forEach(function(r){ if(r[key]) set[r[key]]=1; });
+  return Object.keys(set).sort();
+}
+function fillSelect(id,opts,allLabel){
+  var sel=document.getElementById(id),cur=sel.value;
+  sel.innerHTML='<option value="">'+allLabel+'</option>'+opts.map(function(o){return '<option value="'+esc(o)+'">'+esc(o)+'</option>';}).join('');
+  sel.value=cur;
+}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+function buildStatusChips(){
+  var wrap=document.getElementById('statusChips');
+  wrap.innerHTML=STATUSES.map(function(s){
+    var on=state.filters.statuses.indexOf(s)>-1;
+    return '<button type="button" class="chip'+(on?' on':'')+'" data-status="'+esc(s)+'">'+esc(s)+'</button>';
+  }).join('');
+  wrap.querySelectorAll('.chip').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var s=btn.getAttribute('data-status'),i=state.filters.statuses.indexOf(s);
+      if(i>-1) state.filters.statuses.splice(i,1); else state.filters.statuses.push(s);
+      buildStatusChips(); render();
+    });
+  });
+}
+
+function filtered(){
+  var f=state.filters,q=f.search.toLowerCase();
+  return state.data.filter(function(r){
+    if(f.statuses.length && f.statuses.indexOf(r.status)===-1) return false;
+    if(f.section && r.section!==f.section) return false;
+    if(f.form && r.piece_form!==f.form) return false;
+    if(f.reviewer && r.reviewer!==f.reviewer) return false;
+    if(q && !((r.name||'').toLowerCase().indexOf(q)>-1 || (r.email||'').toLowerCase().indexOf(q)>-1)) return false;
+    return true;
+  });
+}
+
+function render(){
+  renderTiles();
+  var rows=filtered();
+  rows.sort(function(a,b){ return new Date(b.received||0)-new Date(a.received||0); });
+  var tbody=document.getElementById('rows');
+  document.getElementById('emptyMsg').hidden=rows.length>0;
+  tbody.innerHTML=rows.map(function(r){
+    var color=STATUS_COLOR[r.status]||'#a59c9b';
+    return '<tr data-id="'+esc(r.id)+'">'+
+      '<td class="muted">'+fmtDate(r.received)+'</td>'+
+      '<td>'+esc(r.name)+'</td>'+
+      '<td>'+esc(r.section)+'</td>'+
+      '<td>'+esc(r.piece_form)+'</td>'+
+      '<td><span class="pill" style="background:'+color+'">'+esc(r.status||'New')+'</span></td>'+
+      '<td>'+esc(r.reviewer)+'</td>'+
+      '<td class="usd">'+(r.rate?('$'+r.rate):'')+'</td>'+
+      '<td class="muted">'+fmtDate(r.deadline,true)+'</td>'+
+    '</tr>';
+  }).join('');
+  tbody.querySelectorAll('tr').forEach(function(tr){
+    tr.addEventListener('click',function(){ openDrawer(tr.getAttribute('data-id')); });
+  });
+}
+
+function fmtDate(v,dateOnly){
+  if(!v) return '';
+  var d=new Date(v);
+  if(isNaN(d.getTime())) return v;
+  return dateOnly? d.toLocaleDateString() : d.toLocaleDateString();
+}
+
+function renderTiles(){
+  var all=state.data,wrap=document.getElementById('tiles');
+  var counts={}; STATUSES.forEach(function(s){counts[s]=0;});
+  all.forEach(function(r){ if(counts[r.status]!==undefined) counts[r.status]++; });
+  var committed=all.reduce(function(sum,r){ return ['Accepted','Commissioned','Paid'].indexOf(r.status)>-1 ? sum+(+r.rate||0) : sum; },0);
+  var paid=all.reduce(function(sum,r){ return r.payment_status==='Paid' ? sum+(+r.rate||0) : sum; },0);
+  var byReviewer={}; REVIEWERS.forEach(function(rv){byReviewer[rv]=0;});
+  all.forEach(function(r){ if(byReviewer[r.reviewer]!==undefined) byReviewer[r.reviewer]++; });
+
+  var statusHtml=STATUSES.map(function(s){
+    return '<div><span><span class="dot" style="background:'+STATUS_COLOR[s]+'"></span>'+s+'</span><b>'+counts[s]+'</b></div>';
+  }).join('');
+  var reviewerHtml=REVIEWERS.map(function(rv){ return '<div><span>'+rv+'</span><b>'+byReviewer[rv]+'</b></div>'; }).join('');
+
+  wrap.innerHTML=
+    '<div class="tile"><p class="kicker">Total submissions</p><div class="tile__val">'+all.length+'</div></div>'+
+    '<div class="tile"><p class="kicker">By status</p><div class="status-list">'+statusHtml+'</div></div>'+
+    '<div class="tile"><p class="kicker">Budget committed</p><div class="tile__val">$'+committed.toLocaleString()+'</div><p class="kicker" style="margin-top:0.6rem">Paid out</p><div class="tile__val">$'+paid.toLocaleString()+'</div></div>'+
+    '<div class="tile"><p class="kicker">Reviewer workload</p><div class="status-list">'+reviewerHtml+'</div></div>';
+}
+
+function openDrawer(id){
+  var r=state.data.filter(function(x){return String(x.id)===String(id);})[0];
+  if(!r) return;
+  state.activeId=id;
+  document.getElementById('dSection').textContent=(r.section||'—')+' · '+(r.piece_form||'—');
+  document.getElementById('dName').textContent=r.name||'—';
+  document.getElementById('dEmail').textContent=r.email||'—';
+  document.getElementById('dForm').textContent=r.piece_form||'—';
+  document.getElementById('dBio').textContent=r.bio||'—';
+  document.getElementById('dPitch').textContent=r.pitch||'—';
+  document.getElementById('dWhy').textContent=r.why||'—';
+  var sampleEl=document.getElementById('dSample');
+  sampleEl.innerHTML=r.sample?('<a href="'+esc(r.sample)+'" target="_blank" rel="noopener">'+esc(r.sample)+'</a>'):'—';
+  document.getElementById('dReceived').textContent=r.received?new Date(r.received).toLocaleString():'—';
+
+  fillSelect2('eStatus',STATUSES,r.status);
+  fillSelect2('eReviewer',[''].concat(REVIEWERS),r.reviewer);
+  document.getElementById('eNotes').value=r.notes||'';
+  document.getElementById('eDecisionDate').value=r.decision_date||'';
+  document.getElementById('eRate').value=r.rate||'';
+  document.getElementById('eContract').value=r.contract||'';
+  document.getElementById('ePayment').value=r.payment_status||'';
+  document.getElementById('eWordCount').value=r.word_count||'';
+  document.getElementById('eDeadline').value=r.deadline||'';
+
+  document.getElementById('overlay').hidden=false;
+  document.getElementById('drawer').hidden=false;
+}
+function fillSelect2(id,opts,val){
+  var sel=document.getElementById(id);
+  sel.innerHTML=opts.map(function(o){return '<option value="'+esc(o)+'">'+(o?esc(o):'—')+'</option>';}).join('');
+  sel.value=val||'';
+}
+function closeDrawer(){ document.getElementById('overlay').hidden=true; document.getElementById('drawer').hidden=true; state.activeId=null; }
+
+function saveDrawer(){
+  var c=cfg(); if(!state.activeId) return;
+  var patch={
+    status:document.getElementById('eStatus').value,
+    reviewer:document.getElementById('eReviewer').value,
+    notes:document.getElementById('eNotes').value,
+    decision_date:document.getElementById('eDecisionDate').value,
+    rate:document.getElementById('eRate').value,
+    contract:document.getElementById('eContract').value,
+    payment_status:document.getElementById('ePayment').value,
+    word_count:document.getElementById('eWordCount').value,
+    deadline:document.getElementById('eDeadline').value
+  };
+  var row=state.data.filter(function(x){return String(x.id)===String(state.activeId);})[0];
+  if(row) Object.keys(patch).forEach(function(k){ row[k]=patch[k]; });
+  render(); closeDrawer();
+
+  var body=new URLSearchParams();
+  body.set('token',c.token); body.set('id',state.activeId); body.set('patch',JSON.stringify(patch));
+  fetch(c.url,{method:'POST',mode:'no-cors',body:body}).catch(function(){});
+  setTimeout(load,1500);
+}
+
+function openSettings(){
+  var c=cfg();
+  document.getElementById('cfgUrl').value=c.url;
+  document.getElementById('cfgToken').value=c.token;
+  document.getElementById('settingsModal').hidden=false;
+}
+
+function exportCsv(){
+  var rows=filtered();
+  var headers=['id','received','name','email','section','piece_form','bio','pitch','why','sample','status','reviewer','notes','decision_date','rate','contract','payment_status','word_count','deadline'];
+  var lines=[headers.join(',')].concat(rows.map(function(r){
+    return headers.map(function(h){ var v=r[h]==null?'':String(r[h]); return '"'+v.replace(/"/g,'""')+'"'; }).join(',');
+  }));
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='fire-cfp-submissions.csv'; a.click();
+}
+
+document.getElementById('btnRefresh').addEventListener('click',load);
+document.getElementById('btnExport').addEventListener('click',exportCsv);
+document.getElementById('btnSettings').addEventListener('click',openSettings);
+document.getElementById('cfgSave').addEventListener('click',function(){
+  setCfg(document.getElementById('cfgUrl').value.trim(),document.getElementById('cfgToken').value.trim());
+  document.getElementById('settingsModal').hidden=true;
+  load();
+});
+document.getElementById('drawerClose').addEventListener('click',closeDrawer);
+document.getElementById('overlay').addEventListener('click',closeDrawer);
+document.getElementById('btnSave').addEventListener('click',saveDrawer);
+document.getElementById('fSearch').addEventListener('input',function(e){ state.filters.search=e.target.value; render(); });
+document.getElementById('fSection').addEventListener('change',function(e){ state.filters.section=e.target.value; render(); });
+document.getElementById('fForm').addEventListener('change',function(e){ state.filters.form=e.target.value; render(); });
+document.getElementById('fReviewer').addEventListener('change',function(e){ state.filters.reviewer=e.target.value; render(); });
+document.getElementById('fClear').addEventListener('click',function(){
+  state.filters={search:'',section:'',form:'',reviewer:'',statuses:[]};
+  document.getElementById('fSearch').value=''; document.getElementById('fSection').value=''; document.getElementById('fForm').value=''; document.getElementById('fReviewer').value='';
+  buildStatusChips(); render();
+});
+
+buildStatusChips();
+load();
+</script>
+</body>
+</html>
