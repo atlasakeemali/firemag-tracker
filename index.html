@@ -171,7 +171,7 @@ var EDIT_FIELDS=['status','reviewer','notes','decision_date','rate','contract','
 
 var state={data:[],filters:{search:'',section:'',form:'',reviewer:'',statuses:[]},activeId:null};
 
-function cfg(){ return {url:localStorage.getItem('fireCfpUrl')||'',token:localStorage.getItem('fireCfpToken')||''}; }
+function cfg(){ return {url:localStorage.getItem('fireCfpUrl')||'https://script.google.com/macros/s/AKfycbwXSpJzh6IWSTPQDb5qP-h7B90er5NdGKqk_8nzQg5WmI2EkRn5AC-mcOiaIZAynN5x/exec',token:localStorage.getItem('fireCfpToken')||'THE-FIRE-IS-STILL-BURNING'}; }
 function setCfg(url,token){ localStorage.setItem('fireCfpUrl',url); localStorage.setItem('fireCfpToken',token); }
 
 function jsonp(url,params,cb){
