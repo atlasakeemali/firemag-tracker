@@ -353,10 +353,9 @@ function saveDrawer(){
   if(row) Object.keys(patch).forEach(function(k){ row[k]=patch[k]; });
   render(); closeDrawer();
 
-  var body=new URLSearchParams();
-  body.set('token',c.token); body.set('id',state.activeId); body.set('patch',JSON.stringify(patch));
-  fetch(c.url,{method:'POST',mode:'no-cors',body:body}).catch(function(){});
-  setTimeout(function(){ load(); }, 4000);
+jsonp(c.url,{token:c.token,action:'update',id:state.activeId,patch:JSON.stringify(patch)},function(err,res){
+      if(err || !res || !res.ok){ load(); }
+  });
 }
 
 function openSettings(){
