@@ -356,7 +356,7 @@ function saveDrawer(){
   var body=new URLSearchParams();
   body.set('token',c.token); body.set('id',state.activeId); body.set('patch',JSON.stringify(patch));
   fetch(c.url,{method:'POST',mode:'no-cors',body:body}).catch(function(){});
-  setTimeout(load,1500);
+  setTimeout(function(){ load(); }, 4000);
 }
 
 function openSettings(){
